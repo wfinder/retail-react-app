@@ -9,11 +9,11 @@ import React, {useMemo, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import DisplayPrice from '@salesforce/retail-react-app/app/components/display-price'
 
-// Components
 import {
     AspectRatio,
     Badge,
     Box,
+    Button,
     Skeleton as ChakraSkeleton,
     Text,
     Stack,
@@ -22,6 +22,7 @@ import {
     HStack
 } from '@salesforce/retail-react-app/app/components/shared/ui'
 import DynamicImage from '@salesforce/retail-react-app/app/components/dynamic-image'
+import QuantityPicker from '@salesforce/retail-react-app/app/components/quantity-picker'
 
 // Project Components
 import {HeartIcon, HeartSolidIcon} from '@salesforce/retail-react-app/app/components/icons'
@@ -30,6 +31,8 @@ import Swatch from '@salesforce/retail-react-app/app/components/swatch-group/swa
 import SwatchGroup from '@salesforce/retail-react-app/app/components/swatch-group'
 import withRegistration from '@salesforce/retail-react-app/app/components/with-registration'
 import PromoCallout from '@salesforce/retail-react-app/app/components/product-tile/promo-callout'
+import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
+import {useShopperBasketsV2MutationHelper as useShopperBasketsMutationHelper} from '@salesforce/commerce-sdk-react'
 
 // Hooks
 import {useIntl} from 'react-intl'
@@ -100,21 +103,22 @@ const ProductTile = (props) => {
     const {currency} = useCurrency()
     const isFavouriteLoading = useRef(false)
     const styles = useMultiStyleConfig('ProductTile')
+    const toast = useToast()
+    const {addItemToNewOrExistingBasket} = useShopperBasketsMutationHelper()
 
-    const isMasterVariant = !!variants
-    const initialVariationValue =
-        isMasterVariant && !!representedProduct
+    const [selectableAttributeValue, setSelectableAttributeValue] = useState(
+        !!variants && !!representedProduct
             ? variants?.find((variant) => variant.productId == product.representedProduct.id)
                   ?.variationValues?.[selectableAttributeId]
             : undefined
+    )
+    const [quantity, setQuantity] = useState(1)
+    const [isAdding, setIsAdding] = useState(false)
 
-    const [selectableAttributeValue, setSelectableAttributeValue] = useState(initialVariationValue)
+    const selectedQuantity = quantity ?? 1
 
     // Primary image for the tile, the image is determined from the product and selected variation attributes.
     const image = useMemo(() => {
-        // NOTE: If the selectable variation attribute doesn't exist in the products variation attributes
-        // array, lets not filter the image groups on it. This ensures we always return an image for non-variant
-        // type products.
         const hasSelectableAttribute = product?.variationAttributes?.find(
             ({id}) => id === selectableAttributeId
         )
@@ -125,11 +129,10 @@ const ProductTile = (props) => {
             variationValues: hasSelectableAttribute ? variationValues : {}
         })
 
-        // Return the first image of the first group.
         return filteredImageGroups?.[0]?.images[0]
     }, [product, selectableAttributeId, selectableAttributeValue, imageViewType])
 
-    // Primary URL user to wrap the ProduceTile.
+    // Primary URL user to wrap the ProductTile.
     const productUrl = useMemo(
         () =>
             rebuildPathWithParams(productUrlBuilder({id: productId}), {
@@ -148,23 +151,24 @@ const ProductTile = (props) => {
     const localizedProductName = product.name ?? product.productName
 
     const productWithFilteredVariants = useMemo(() => {
-        const variants = product?.variants?.filter(
+        const filteredVariants = product?.variants?.filter(
             ({variationValues}) =>
                 variationValues[selectableAttributeId] === selectableAttributeValue
         )
         return {
             ...product,
-            variants
+            variants: filteredVariants
         }
     }, [product, selectableAttributeId, selectableAttributeValue])
 
-    // Pricing is dynamic! Ensure we are showing the right price for the selected variation attribute
-    // value.
+    const selectedProduct = useMemo(() => {
+        return productWithFilteredVariants?.variants?.[0] || product
+    }, [productWithFilteredVariants, product])
+
     const priceData = useMemo(() => {
         return getPriceData(productWithFilteredVariants)
     }, [productWithFilteredVariants])
 
-    // Retrieve product badges
     const filteredLabels = useMemo(() => {
         const labelsMap = new Map()
         if (product?.representedProduct) {
@@ -181,6 +185,55 @@ const ProductTile = (props) => {
         return labelsMap
     }, [product, badgeDetails])
 
+    const handleQuantityChange = (stringValue, numberValue) => {
+        if (numberValue >= 1) {
+            setQuantity(numberValue)
+        } else if (stringValue === '') {
+            setQuantity(stringValue)
+        }
+    }
+
+    const handleAddToCart = async () => {
+        if (isAdding || selectedQuantity < 1) {
+            return
+        }
+
+        setIsAdding(true)
+        try {
+            await addItemToNewOrExistingBasket([
+                {
+                    productId: selectedProduct?.productId || selectedProduct?.id,
+                    price: selectedProduct?.price,
+                    quantity: selectedQuantity
+                }
+            ])
+
+            toast({
+                title: intl.formatMessage(
+                    {
+                        id: 'product_tile.toast.added_to_cart',
+                        defaultMessage: 'Added {productName} to cart'
+                    },
+                    {productName: localizedProductName}
+                ),
+                status: 'success'
+            })
+        } catch (error) {
+            toast({
+                title:
+                    typeof error?.message === 'string'
+                        ? error.message
+                        : intl.formatMessage({
+                              id: 'product_tile.toast.add_to_cart_error',
+                              defaultMessage: 'Unable to add item to cart'
+                          }),
+                status: 'error'
+            })
+        } finally {
+            setIsAdding(false)
+        }
+    }
+
     return (
         <Box {...styles.container}>
             <Link data-testid="product-tile" to={productUrl} {...styles.link} {...rest}>
@@ -196,9 +249,6 @@ const ProductTile = (props) => {
                             }[?sw={width}&q=60]`}
                             widths={dynamicImageProps?.widths}
                             imageProps={{
-                                // treat img as a decorative item, we don't need to pass `image.alt`
-                                // since it is the same as product name
-                                // which can cause confusion for individuals who uses screen readers
                                 alt: '',
                                 loading: 'lazy',
                                 ...dynamicImageProps?.imageProps
@@ -207,7 +257,6 @@ const ProductTile = (props) => {
                     </AspectRatio>
                 </Box>
 
-                {/* Swatches */}
                 {variationAttributes
                     ?.filter(({id}) => selectableAttributeId === id)
                     ?.map(({id, name, values}) => (
@@ -251,29 +300,53 @@ const ProductTile = (props) => {
                         </SwatchGroup>
                     ))}
 
-                {/* Title */}
                 <Text {...styles.title}>{localizedProductName}</Text>
 
                 {isRefreshingData ? (
                     <PricingAndPromotionsSkeleton />
                 ) : (
                     <>
-                        {/* Price */}
                         <DisplayPrice priceData={priceData} currency={currency} />
-
-                        {/* Promotion call-out message */}
                         {shouldShowPromoCallout(productWithFilteredVariants) && (
                             <PromoCallout product={productWithFilteredVariants} />
                         )}
                     </>
                 )}
             </Link>
+
+            <Stack spacing={3} mt={3}>
+                <HStack justify="space-between" align="center">
+                    <Text fontSize="sm" color="gray.700">
+                        {intl.formatMessage({
+                            id: 'product_tile.label.quantity',
+                            defaultMessage: 'Qty'
+                        })}
+                    </Text>
+                    <QuantityPicker
+                        productName={localizedProductName}
+                        min={1}
+                        value={quantity}
+                        onChange={handleQuantityChange}
+                    />
+                </HStack>
+                <Button
+                    width="100%"
+                    colorScheme="blue"
+                    onClick={handleAddToCart}
+                    isLoading={isAdding}
+                    isDisabled={isAdding || selectedQuantity < 1}
+                    data-testid="product-tile-add-to-cart-button"
+                >
+                    {intl.formatMessage({
+                        id: 'product_tile.button.add_to_cart',
+                        defaultMessage: 'Add to cart'
+                    })}
+                </Button>
+            </Stack>
+
             {enableFavourite && (
                 <Box
                     onClick={(e) => {
-                        // stop click event from bubbling
-                        // to avoid user from clicking the underlying
-                        // product while the favourite icon is disabled
                         e.preventDefault()
                     }}
                 >
@@ -339,17 +412,7 @@ ProductTile.propTypes = {
         price: PropTypes.number,
         priceRanges: PropTypes.array,
         tieredPrices: PropTypes.array,
-        // `name` is present and localized when `product` is provided by a RecommendedProducts component
-        // (from Shopper Products `getProducts` endpoint), but is not present when `product` is
-        // provided by a ProductList component.
-        // See: https://developer.salesforce.com/docs/commerce/commerce-api/references/shopper-products?meta=getProducts
         name: PropTypes.string,
-        // `productName` is localized when provided by a ProductList component (from Shopper Search
-        // `productSearch` endpoint), but is NOT localized when provided by a RecommendedProducts
-        // component (from Einstein Recommendations `getRecommendations` endpoint).
-        // See: https://developer.salesforce.com/docs/commerce/commerce-api/references/shopper-search?meta=productSearch
-        // See: https://developer.salesforce.com/docs/commerce/einstein-api/references/einstein-api-quick-start-guide?meta=getRecommendations
-        // Note: useEinstein() transforms snake_case property names from the API response to camelCase
         productName: PropTypes.string,
         productId: PropTypes.string,
         productPromotions: PropTypes.array,
@@ -359,42 +422,17 @@ ProductTile.propTypes = {
         variants: PropTypes.array,
         type: PropTypes.shape({
             set: PropTypes.bool,
-
             bundle: PropTypes.bool,
             item: PropTypes.bool
         })
     }),
-    /**
-     * Enable adding/removing product as a favourite.
-     * Use case: wishlist.
-     */
     enableFavourite: PropTypes.bool,
-    /**
-     * Display the product as a favourite.
-     */
     isFavourite: PropTypes.bool,
-    /**
-     * Callback function to be invoked when the user
-     * interacts with favourite icon/button.
-     */
     onFavouriteToggle: PropTypes.func,
-    /**
-     * The `viewType` of the image component. This defaults to 'large'.
-     */
     imageViewType: PropTypes.string,
-    /**
-     * When displaying a master/variant product, this value represents the variation attribute that is displayed
-     * as a swatch below the main image. The default for this property is `color`.
-     */
     selectableAttributeId: PropTypes.string,
     dynamicImageProps: PropTypes.object,
-    /**
-     * Details of badge labels and the corresponding product custom properties that enable badges.
-     */
     badgeDetails: PropTypes.array,
-    /**
-     * Determines whether to display a skeleton over personalizable data (e.g., pricing and promotions) during data refresh.
-     */
     isRefreshingData: PropTypes.bool
 }
 
