@@ -32,6 +32,7 @@ import {useCorrelationId} from '@salesforce/pwa-kit-react-sdk/ssr/universal/hook
 import {getAppOrigin} from '@salesforce/pwa-kit-react-sdk/utils/url'
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
 import {generateSfdcUserAgent} from '@salesforce/retail-react-app/app/utils/sfdc-user-agent-utils'
+import {QuickViewModalProvider} from '../quick-view-modal/provider'
 import {
     DEFAULT_DNT_STATE,
     STORE_LOCATOR_RADIUS,
@@ -105,7 +106,9 @@ const AppConfig = ({children, locals = {}}) => {
         >
             <MultiSiteProvider site={locals.site} locale={locals.locale} buildUrl={locals.buildUrl}>
                 <StoreLocatorProvider config={storeLocatorConfig}>
-                    <ChakraProvider theme={theme}>{children}</ChakraProvider>
+                    <ChakraProvider theme={theme}>
+                        <QuickViewModalProvider>{children}</QuickViewModalProvider>
+                    </ChakraProvider>
                 </StoreLocatorProvider>
             </MultiSiteProvider>
             <ReactQueryDevtools />

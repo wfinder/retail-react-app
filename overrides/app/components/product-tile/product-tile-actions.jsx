@@ -17,6 +17,7 @@ import {
 import QuantityPicker from '@salesforce/retail-react-app/app/components/quantity-picker'
 import {useToast} from '@salesforce/retail-react-app/app/hooks/use-toast'
 import {useShopperBasketsV2MutationHelper as useShopperBasketsMutationHelper} from '@salesforce/commerce-sdk-react'
+import {useQuickViewModal} from '../../hooks/use-quick-view-modal'
 
 /**
  * Search results from SCAPI use hitType to describe the product shape:
@@ -24,19 +25,19 @@ import {useShopperBasketsV2MutationHelper as useShopperBasketsMutationHelper} fr
  * - "master"  = a parent product with variants (e.g. color and size)
  *
  * We only allow add-to-cart on simple products because the tile has no way to
- * pick a variant. Variation products will get a "Choose options" button instead,
- * which will eventually open a quick view modal (built separately).
+ * pick a variant. Variation products open a quick view modal instead.
  */
 export const isVariationProduct = (product) =>
     product?.hitType === 'master' || Boolean(product?.variants?.length)
 
 /**
  * Tile-level actions below the product image: add-to-cart for simple products,
- * or a placeholder for quick view on variation products.
+ * or a quick view entry point for variation products.
  */
-const ProductTileActions = ({product, onChooseOptionsClick}) => {
+const ProductTileActions = ({product}) => {
     const intl = useIntl()
     const toast = useToast()
+    const {openQuickView} = useQuickViewModal()
     const {addItemToNewOrExistingBasket} = useShopperBasketsMutationHelper()
 
     const [quantity, setQuantity] = useState(1)
@@ -96,10 +97,7 @@ const ProductTileActions = ({product, onChooseOptionsClick}) => {
     }
 
     const handleChooseOptionsClick = () => {
-        // Wire this up to a quick view modal when that feature is built.
-        if (onChooseOptionsClick) {
-            onChooseOptionsClick(product)
-        }
+        openQuickView(product)
     }
 
     if (isVariation) {
@@ -155,12 +153,7 @@ const ProductTileActions = ({product, onChooseOptionsClick}) => {
 }
 
 ProductTileActions.propTypes = {
-    product: PropTypes.object.isRequired,
-    /**
-     * Optional callback for variation products. Pass this from a parent once the
-     * quick view modal is built; until then the button renders but does nothing.
-     */
-    onChooseOptionsClick: PropTypes.func
+    product: PropTypes.object.isRequired
 }
 
 export default ProductTileActions

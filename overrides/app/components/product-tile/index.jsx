@@ -6,7 +6,6 @@
  */
 
 import React from 'react'
-import PropTypes from 'prop-types'
 import {Box} from '@salesforce/retail-react-app/app/components/shared/ui'
 
 /**
@@ -38,26 +37,22 @@ export {BaseProductTileSkeleton as Skeleton}
  * Custom ProductTile that extends the Retail React App default.
  *
  * Simple products (hitType "product") get a quantity picker and add-to-cart.
- * Variation products (hitType "master") get a "Choose options" button as a
- * placeholder for a future quick view modal, since the tile cannot capture
- * selections like color and size.
+ * Variation products (hitType "master") get a "Choose options" button that
+ * opens the global quick view modal.
  */
 const ProductTile = (props) => {
-    const {product, onChooseOptionsClick, ...rest} = props
+    const {product, ...rest} = props
 
     return (
         <Box>
             <BaseProductTile product={product} {...rest} />
 
-            <ProductTileActions product={product} onChooseOptionsClick={onChooseOptionsClick} />
+            <ProductTileActions product={product} />
         </Box>
     )
 }
 
-ProductTile.propTypes = {
-    ...BaseProductTile.propTypes,
-    onChooseOptionsClick: PropTypes.func
-}
+ProductTile.propTypes = BaseProductTile.propTypes
 ProductTile.displayName = 'ProductTile'
 
 export default ProductTile

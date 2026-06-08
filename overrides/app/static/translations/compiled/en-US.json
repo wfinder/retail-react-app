@@ -803,12 +803,6 @@
       "value": "Scroll carousel right"
     }
   ],
-  "cart.info.removed_from_cart": [
-    {
-      "type": 0,
-      "value": "Item removed from cart"
-    }
-  ],
   "cart.order_type.delivery": [
     {
       "type": 0,
@@ -1523,12 +1517,6 @@
       "value": "No, keep item"
     }
   ],
-  "confirmation_modal.remove_cart_item.action.remove": [
-    {
-      "type": 0,
-      "value": "Remove"
-    }
-  ],
   "confirmation_modal.remove_cart_item.action.yes": [
     {
       "type": 0,
@@ -1541,22 +1529,10 @@
       "value": "No, keep item"
     }
   ],
-  "confirmation_modal.remove_cart_item.assistive_msg.remove": [
-    {
-      "type": 0,
-      "value": "Remove unavailable products"
-    }
-  ],
   "confirmation_modal.remove_cart_item.assistive_msg.yes": [
     {
       "type": 0,
       "value": "Yes, remove item"
-    }
-  ],
-  "confirmation_modal.remove_cart_item.message.need_to_remove_due_to_unavailability": [
-    {
-      "type": 0,
-      "value": "Some items are no longer available online and will be removed from your cart."
     }
   ],
   "confirmation_modal.remove_cart_item.message.sure_to_remove": [
@@ -1569,12 +1545,6 @@
     {
       "type": 0,
       "value": "Confirm Remove Item"
-    }
-  ],
-  "confirmation_modal.remove_cart_item.title.items_unavailable": [
-    {
-      "type": 0,
-      "value": "Items Unavailable"
     }
   ],
   "confirmation_modal.remove_wishlist_item.action.no": [
@@ -2227,24 +2197,6 @@
       "value": "Wishlist"
     }
   ],
-  "global.error.feature_unavailable": [
-    {
-      "type": 0,
-      "value": "This feature is not currently available."
-    }
-  ],
-  "global.error.invalid_token": [
-    {
-      "type": 0,
-      "value": "Invalid token, please try again."
-    }
-  ],
-  "global.error.something_went_wrong": [
-    {
-      "type": 0,
-      "value": "Something went wrong. Try again!"
-    }
-  ],
   "global.error.too_many_login_attempts": [
     {
       "type": 0,
@@ -2255,68 +2207,6 @@
     {
       "type": 0,
       "value": "You reached the limit for password resets. For your security, wait 10 minutes and try again."
-    }
-  ],
-  "global.info.added_to_wishlist": [
-    {
-      "type": 1,
-      "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "offset": 0,
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "item"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "items"
-            }
-          ]
-        }
-      },
-      "pluralType": "cardinal",
-      "type": 6,
-      "value": "quantity"
-    },
-    {
-      "type": 0,
-      "value": " added to wishlist"
-    }
-  ],
-  "global.info.already_in_wishlist": [
-    {
-      "type": 0,
-      "value": "Item is already in wishlist"
-    }
-  ],
-  "global.info.removed_from_wishlist": [
-    {
-      "type": 0,
-      "value": "Item removed from wishlist"
-    }
-  ],
-  "global.info.store_insufficient_inventory": [
-    {
-      "type": 0,
-      "value": "Some items aren't available for pickup at this store."
-    }
-  ],
-  "global.link.added_to_wishlist.view_wishlist": [
-    {
-      "type": 0,
-      "value": "View"
     }
   ],
   "header.button.assistive_msg.ask_shopping_agent": [
@@ -2393,24 +2283,6 @@
     {
       "type": 0,
       "value": "My Account"
-    }
-  ],
-  "home.description.features": [
-    {
-      "type": 0,
-      "value": "Out-of-the-box features so that you focus only on adding enhancements."
-    }
-  ],
-  "home.description.here_to_help": [
-    {
-      "type": 0,
-      "value": "Contact our support staff."
-    }
-  ],
-  "home.description.here_to_help_line_2": [
-    {
-      "type": 0,
-      "value": "They will get you to the right place."
     }
   ],
   "home.description.shop_products": [
@@ -2499,18 +2371,6 @@
       "value": "Wishlist"
     }
   ],
-  "home.heading.features": [
-    {
-      "type": 0,
-      "value": "Features"
-    }
-  ],
-  "home.heading.here_to_help": [
-    {
-      "type": 0,
-      "value": "We're here to help"
-    }
-  ],
   "home.heading.shop_products": [
     {
       "type": 0,
@@ -2535,12 +2395,6 @@
       "value": "Deploy on Managed Runtime"
     }
   ],
-  "home.link.contact_us": [
-    {
-      "type": 0,
-      "value": "Contact Us"
-    }
-  ],
   "home.link.get_started": [
     {
       "type": 0,
@@ -2551,18 +2405,6 @@
     {
       "type": 0,
       "value": "Read docs"
-    }
-  ],
-  "home.title.home": [
-    {
-      "type": 0,
-      "value": "Home"
-    }
-  ],
-  "home.title.react_starter_store": [
-    {
-      "type": 0,
-      "value": "The React PWA Starter Store for Retail"
     }
   ],
   "icons.assistive_msg.lock": [
@@ -3793,16 +3635,42 @@
       "value": " from wishlist"
     }
   ],
-  "product_tile.badge.label.new": [
+  "product_tile.button.add_to_cart": [
     {
       "type": 0,
-      "value": "New"
+      "value": "Add to cart"
     }
   ],
-  "product_tile.badge.label.sale": [
+  "product_tile.button.choose_options": [
     {
       "type": 0,
-      "value": "Sale"
+      "value": "Choose options"
+    }
+  ],
+  "product_tile.label.quantity": [
+    {
+      "type": 0,
+      "value": "Qty"
+    }
+  ],
+  "product_tile.toast.add_to_cart_error": [
+    {
+      "type": 0,
+      "value": "Unable to add item to cart"
+    }
+  ],
+  "product_tile.toast.added_to_cart": [
+    {
+      "type": 0,
+      "value": "Added "
+    },
+    {
+      "type": 1,
+      "value": "productName"
+    },
+    {
+      "type": 0,
+      "value": " to cart"
     }
   ],
   "product_view.button.add_bundle_to_cart": [
@@ -4035,6 +3903,22 @@
     {
       "type": 0,
       "value": "Do you have a promo code?"
+    }
+  ],
+  "quick_view.message.loading": [
+    {
+      "type": 0,
+      "value": "Loading product details..."
+    }
+  ],
+  "quick_view.modal.label": [
+    {
+      "type": 0,
+      "value": "Quick view for "
+    },
+    {
+      "type": 1,
+      "value": "productName"
     }
   ],
   "recent_searches.action.clear_searches": [

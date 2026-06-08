@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom'
 import ProductTile, {Skeleton} from './index'
 import ProductTileActions, {isVariationProduct} from './product-tile-actions'
-import {render, screen} from '@testing-library/react'
+import {render, screen, fireEvent} from '@testing-library/react'
 import {IntlProvider} from 'react-intl'
 import {BrowserRouter as Router} from 'react-router-dom'
 import {ChakraProvider} from '@salesforce/retail-react-app/app/components/shared/ui'
@@ -11,6 +11,8 @@ import {
     mockStandardProductHit,
     mockMasterProductHitWithOneVariant
 } from '@salesforce/retail-react-app/app/mocks/product-search-hit-data'
+
+const mockOpenQuickView = jest.fn()
 
 jest.mock('@salesforce/retail-react-app/app/components/link', () => ({
     __esModule: true,
@@ -31,6 +33,15 @@ jest.mock('@salesforce/retail-react-app/app/hooks', () => ({
     useCurrency: () => ({currency: 'GBP'})
 }))
 
+jest.mock('../../hooks/use-quick-view-modal', () => ({
+    useQuickViewModal: () => ({
+        openQuickView: mockOpenQuickView,
+        closeQuickView: jest.fn(),
+        isOpen: false,
+        product: null
+    })
+}))
+
 const renderWithProviders = (ui) =>
     render(
         <IntlProvider locale="en-GB" defaultLocale="en-GB">
@@ -39,6 +50,10 @@ const renderWithProviders = (ui) =>
             </ChakraProvider>
         </IntlProvider>
     )
+
+beforeEach(() => {
+    mockOpenQuickView.mockClear()
+})
 
 test('renders add to cart and quantity controls for simple products', () => {
     renderWithProviders(<ProductTile product={mockStandardProductHit} />)
@@ -55,6 +70,14 @@ test('renders choose options button for variation products', () => {
     expect(screen.getByTestId('product-tile-choose-options-button')).toBeInTheDocument()
     expect(screen.queryByTestId('product-tile-add-to-cart-button')).not.toBeInTheDocument()
     expect(screen.queryByText(/Qty/i)).not.toBeInTheDocument()
+})
+
+test('opens quick view when choose options is clicked', () => {
+    renderWithProviders(<ProductTileActions product={mockMasterProductHitWithOneVariant} />)
+
+    fireEvent.click(screen.getByTestId('product-tile-choose-options-button'))
+
+    expect(mockOpenQuickView).toHaveBeenCalledWith(mockMasterProductHitWithOneVariant)
 })
 
 test('identifies simple vs variation products by hitType', () => {
